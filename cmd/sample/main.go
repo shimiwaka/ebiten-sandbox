@@ -1,15 +1,21 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"log"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const (
 	screenX		= 640
 	screenY		= 480
+	fontSize	= 16
 )
 
 type Game struct {
@@ -26,7 +32,19 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	tt, err := opentype.Parse(fonts.PressStart2P_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	const dpi = 72
+	arcadeFont, _ := opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSize,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
 
+	screen.Fill(color.White)
+	text.Draw(screen, fmt.Sprintf("TESUYA"), arcadeFont, 300, 20, color.Black)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
