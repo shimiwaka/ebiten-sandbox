@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"log"
+	"image"
+	_ "image/png"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -18,6 +22,13 @@ const (
 	fontSize	= 16
 )
 
+var (
+	sampleImg *ebiten.Image
+)
+
+//go:embed resource/nandakore.png
+var byteSampleImg []byte
+
 type Game struct {
 	score		int
 }
@@ -32,6 +43,13 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	img, _, err := image.Decode(bytes.NewReader(byteSampleImg))
+	if err != nil {
+		fmt.Println("IMAGE LOADING ERROR")
+		log.Fatal(err)
+	}
+	sampleImg = ebiten.NewImageFromImage(img)
+
 	tt, err := opentype.Parse(fonts.PressStart2P_ttf)
 	if err != nil {
 		log.Fatal(err)
@@ -45,6 +63,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	screen.Fill(color.White)
 	text.Draw(screen, fmt.Sprintf("TESUYA"), arcadeFont, 300, 20, color.Black)
+	
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(100, 100)
+	op.Filter = ebiten.FilterLinear
+	screen.DrawImage(sampleImg, op)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
