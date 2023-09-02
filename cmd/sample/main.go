@@ -12,9 +12,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
+	// "github.com/hajimehoshi/ebiten/v2/inpututil"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
+
+const DefaultTPS = 15
 
 const (
 	screenX		= 640
@@ -31,15 +34,31 @@ var byteSampleImg []byte
 
 type Game struct {
 	score		int
+	objectX		float64
+	objectY		float64
 }
 
 func NewGame() *Game {
 	g := &Game{}
+	g.objectX = 20
+	g.objectY = 20
 	return g
 }
 
 func (g *Game) Update() error {
+	if g.isKeyPressed() {
+		g.objectX += 1
+	} else {
+		g.objectX -= 1
+	}
 	return nil
+}
+
+func (g *Game) isKeyPressed() bool {
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		return true
+	}
+	return false
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -65,7 +84,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("TESUYA"), arcadeFont, 300, 20, color.Black)
 	
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(100, 100)
+	op.GeoM.Translate(g.objectX, g.objectY)
 	op.Filter = ebiten.FilterLinear
 	screen.DrawImage(sampleImg, op)
 }
