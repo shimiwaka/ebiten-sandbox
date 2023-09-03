@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -29,9 +28,11 @@ import (
 )
 
 type Game struct {
-	nowPage int
-	pages   []*Page
-	stroke  *Stroke
+	nowPage   int
+	pages     []*Page
+	stroke    *Stroke
+	offset    int
+	tmpOffset int
 }
 
 type Content struct {
@@ -42,7 +43,6 @@ type Content struct {
 
 type Page struct {
 	contents []*Content
-	offset   int
 }
 
 const (
@@ -77,8 +77,17 @@ type Stroke struct {
 	released bool
 }
 
+func (s *Stroke) Update() {
+	if s.source.IsJustReleased() {
+		s.released = true
+	} else {
+		s.released = false
+	}
+	s.currentX, s.currentY = s.source.Position()
+}
+
 func (s *Stroke) IsReleased() bool {
-	return s.source.IsJustReleased()
+	return s.released
 }
 
 func NewStroke(source StrokeSource) *Stroke {
@@ -138,14 +147,16 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		s := NewStroke(&MouseStrokeSource{})
-		fmt.Println("stroke start!")
 		g.stroke = s
 	}
 
 	if g.stroke != nil {
-		if g.stroke.IsReleased() {
-			fmt.Println("stroke end!")
+		g.stroke.Update()
+		g.tmpOffset = g.stroke.currentY - g.stroke.initY
+		if g.stroke.released {
 			g.stroke = nil
+			g.offset = g.offset + g.tmpOffset
+			g.tmpOffset = 0
 		}
 	}
 
@@ -154,7 +165,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, v := range g.pages[g.nowPage].contents {
-		text.Draw(screen, v.value, normalFont, 0, v.y, color.White)
+		text.Draw(screen, v.value, normalFont, 0, v.y+g.offset+g.tmpOffset, color.White)
 	}
 
 	return
