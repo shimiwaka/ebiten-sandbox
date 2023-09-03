@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -161,7 +160,6 @@ func (g *Game) Update() error {
 				g.offset = 0
 			}
 			g.tmpOffset = 0
-			fmt.Printf("%d\n", g.offset)
 		}
 	}
 
@@ -169,8 +167,10 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(color.White)
+
 	for _, v := range g.pages[g.nowPage].contents {
-		text.Draw(screen, v.value, normalFont, 0, v.y+g.offset+g.tmpOffset, color.White)
+		text.Draw(screen, v.value, normalFont, 0, v.y+g.offset+g.tmpOffset, color.Black)
 	}
 
 	return
