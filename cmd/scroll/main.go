@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -156,7 +157,11 @@ func (g *Game) Update() error {
 		if g.stroke.released {
 			g.stroke = nil
 			g.offset = g.offset + g.tmpOffset
+			if g.offset > 0 {
+				g.offset = 0
+			}
 			g.tmpOffset = 0
+			fmt.Printf("%d\n", g.offset)
 		}
 	}
 
