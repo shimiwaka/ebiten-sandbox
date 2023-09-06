@@ -33,6 +33,7 @@ type Game struct {
 	stroke    *Stroke
 	offset    int
 	tmpOffset int
+	touchIDs  []ebiten.TouchID
 }
 
 type Content struct {
@@ -63,6 +64,18 @@ func (m *MouseStrokeSource) Position() (int, int) {
 
 func (m *MouseStrokeSource) IsJustReleased() bool {
 	return inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft)
+}
+
+type TouchStrokeSource struct {
+	ID ebiten.TouchID
+}
+
+func (t *TouchStrokeSource) Position() (int, int) {
+	return ebiten.TouchPosition(t.ID)
+}
+
+func (t *TouchStrokeSource) IsJustReleased() bool {
+	return inpututil.IsTouchJustReleased(t.ID)
 }
 
 type Stroke struct {
@@ -147,6 +160,11 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		s := NewStroke(&MouseStrokeSource{})
+		g.stroke = s
+	}
+	g.touchIDs = inpututil.AppendJustPressedTouchIDs(g.touchIDs[:0])
+	for _, id := range g.touchIDs {
+		s := NewStroke(&TouchStrokeSource{id})
 		g.stroke = s
 	}
 
