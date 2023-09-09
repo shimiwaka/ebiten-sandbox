@@ -156,7 +156,9 @@ func (g *Game) Update() error {
 
 	if g.stroke != nil {
 		g.stroke.Update()
-		g.tmpOffset = g.stroke.currentY - g.stroke.initY
+		if !g.stroke.released {
+			g.tmpOffset = g.stroke.currentY - g.stroke.initY
+		}
 		if g.stroke.released {
 			g.stroke = nil
 			g.offset = g.offset + g.tmpOffset
